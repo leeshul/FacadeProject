@@ -1,22 +1,75 @@
-using UnityEditor;
+using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour {
   [SerializeField] private float moveSpeed = 7f;
   [SerializeField] private GameInput gameInput;
+  [SerializeField] private LayerMask countersLayerMask;
+
 
   private bool isWalking;
-  private void Update() {
+  private Vector3 lastInteractDir;
 
+  private void Start(){
+    gameInput.OnInteractAction += GameInput_OnInteractAction;
+  }
+
+  private void GameInput_OnInteractAction(object sender, System.EventArgs e) {
     Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
     Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
+    if (moveDir != Vector3.zero) {
+      lastInteractDir = moveDir;
+    } 
+
+    float interactDistance = 2f;
+    if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance, countersLayerMask)){
+      if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter)){
+        // Has ClearCounter
+        clearCounter.Interact();
+      }
+    }
+  }
+  private void Update() {
+    HandleMovement();
+    HandleInteractions();
+  }
+
+  public bool IsWalking() {
+    return isWalking;
+  }
+
+  private void HandleInteractions(){
+    // TODO: refactor to avoid code duplication.
+    Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+
+    Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+
+    if (moveDir != Vector3.zero) {
+      lastInteractDir = moveDir;
+    } 
+
+    float interactDistance = 2f;
+    if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance, countersLayerMask)){
+
+      if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter)){
+        // Has ClearCounter
+        // clearCounter.Interact();
+      }
+    }
+
+  }
+
+  private void HandleMovement() {
+    Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+
+    Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+    
     float moveDistance = moveSpeed * Time.deltaTime;
     float playerRadius = .7f;
     float playerHeight = 2f;
-
-
+    
     bool canMove;
     canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance); 
     
@@ -40,7 +93,7 @@ public class Player : MonoBehaviour {
           moveDir = moveDirZ;
         } else {
           // Cannot move in any direnction
-          
+        
           // TODO : 대각선 모서리에서 부자연스럽게 진행 못하는 문제.
           // TODO : 움직임 방향이 8방향 밖에 없는 문제.
         }
@@ -59,7 +112,7 @@ public class Player : MonoBehaviour {
 
   }
 
-  public bool IsWalking() {
-    return isWalking;
-  }
 }
+
+
+
