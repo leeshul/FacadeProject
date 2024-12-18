@@ -114,5 +114,6 @@
   },
   "editor.tabSize": 2,
   "editor.snippetSuggestions": "inline",
-  "editor.tabCompletion": "onlySnippets"
+  "editor.tabCompletion": "onlySnippets",
+  "editor.suggest.showReferences": false
 }

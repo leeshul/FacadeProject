@@ -13,7 +13,6 @@ public class GameInput : MonoBehaviour
 
     playerInputActions.Player.Interact.performed += Interact_performed;
     // attention :: not a function call.. just passing the function it self.
-
   }
   private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj) {
     OnInteractAction?.Invoke(this, EventArgs.Empty);
